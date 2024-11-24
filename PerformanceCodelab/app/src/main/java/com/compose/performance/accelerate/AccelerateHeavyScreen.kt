@@ -29,12 +29,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -80,7 +81,11 @@ fun AccelerateHeavyScreen(items: List<HeavyItem>, modifier: Modifier = Modifier)
             .fillMaxSize()
             .padding(24.dp)
     ) {
-        ScreenContent(items = items)
+        if (PerformanceTestConstants.IS_LAZY) {
+            ScreenContent(items = items)
+        } else {
+            NonLazyScreenContent(items = items)
+        }
         
         if (items.isEmpty()) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -90,15 +95,26 @@ fun AccelerateHeavyScreen(items: List<HeavyItem>, modifier: Modifier = Modifier)
 
 @Composable
 fun ScreenContent(items: List<HeavyItem>) {
-    LazyVerticalGrid(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .testTag("list_of_items"),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        columns = GridCells.Fixed(2)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(items) { item -> HeavyItem(item) }
+    }
+}
+
+@Composable
+fun NonLazyScreenContent(items: List<HeavyItem>) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .testTag("list_of_items")
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items.forEach { item -> HeavyItem(item) }
     }
 }
 
@@ -114,7 +130,7 @@ fun HeavyItem(item: HeavyItem, modifier: Modifier = Modifier) {
             AsyncImage(
                 model = item.url,
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .width(width = 96.dp)
                     .aspectRatio(1f)
                     .shadow(8.dp, RoundedCornerShape(12.dp)),
                 contentDescription = stringResource(R.string.performance_dashboard),

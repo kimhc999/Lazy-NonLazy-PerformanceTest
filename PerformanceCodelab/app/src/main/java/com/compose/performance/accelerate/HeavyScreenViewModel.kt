@@ -37,7 +37,7 @@ class HeavyScreenViewModel : ViewModel() {
     init {
         viewModelScope.launch {
             delay(500)
-            _items.value = generateItems(1000)
+            _items.value = generateItems(PerformanceTestConstants.ITEM_COUNT)
         }
     }
 }
